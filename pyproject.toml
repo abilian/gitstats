@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "gitstats"
+version = "0.1.0"
+description = ""
+authors = ["Stefane Fermigier <sf@fermigier.com>"]
+readme = "README.md"
+packages = [{include = "gitstats", from = "src" }]
+
+[tool.poetry.scripts]
+gitstats = "gitstats.main:main"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
