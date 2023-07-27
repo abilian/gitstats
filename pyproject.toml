@@ -12,6 +12,9 @@ gitstats = "gitstats.main:main"
 [tool.poetry.dependencies]
 python = "^3.9"
 
+[tool.poetry.group.dev.dependencies]
+abilian-devtools = "^0.5.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

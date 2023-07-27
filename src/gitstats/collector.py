@@ -6,8 +6,8 @@ import time
 import zlib
 from multiprocessing import Pool
 
-from gitstats.config import conf
-from gitstats.utils import (
+from .config import conf
+from .utils import (
     getkeyssortedbyvaluekey,
     getpipeoutput,
     getlogrange,
@@ -20,6 +20,9 @@ from gitstats.utils import (
 
 class DataCollector:
     """Manages data collection from a revision control repository."""
+
+    dir: str
+    projectname: str
 
     def __init__(self):
         self.stamp_created = time.time()
@@ -34,9 +37,18 @@ class DataCollector:
         self.activity_by_year_week = {}  # yy_wNN -> commits
         self.activity_by_year_week_peak = 0
 
+        # name -> {
+        #   commits,
+        #   first_commit_stamp,
+        #   last_commit_stamp,
+        #   last_active_day,
+        #   active_days,
+        #   lines_added,
+        #   lines_removed.
+        # }
         self.authors = (
             {}
-        )  # name -> {commits, first_commit_stamp, last_commit_stamp, last_active_day, active_days, lines_added, lines_removed}
+        )
 
         self.total_commits = 0
         self.total_files = 0
@@ -198,7 +210,6 @@ class GitDataCollector(DataCollector):
             )
             if len(output) > 0:
                 parts = output.split(" ")
-                stamp = 0
                 try:
                     stamp = int(parts[0])
                 except ValueError:
@@ -563,10 +574,8 @@ class GitDataCollector(DataCollector):
             ]
         ).split("\n")
         lines.reverse()
-        files = 0
         inserted = 0
         deleted = 0
-        author = None
         stamp = 0
         for line in lines:
             if len(line) == 0:

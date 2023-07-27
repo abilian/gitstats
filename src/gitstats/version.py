@@ -1,4 +1,5 @@
 import os
+from functools import cache
 
 from .config import gnuplot_cmd
 from .utils import getcommitrange, getpipeoutput
@@ -6,6 +7,7 @@ from .utils import getcommitrange, getpipeoutput
 VERSION = 0
 
 
+@cache
 def getversion():
     global VERSION
     if VERSION == 0:
@@ -19,9 +21,11 @@ def getversion():
     return VERSION
 
 
+@cache
 def getgitversion():
     return getpipeoutput(["git --version"]).split("\n")[0]
 
 
+@cache
 def getgnuplotversion():
     return getpipeoutput([f"{gnuplot_cmd} --version"]).split("\n")[0]

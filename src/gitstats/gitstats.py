@@ -108,8 +108,6 @@ class GitStats:
         if sys.stdin.isatty():
             print("You may now run:")
             print()
-            print(
-                "   sensible-browser '%s'"
-                % os.path.join(outputpath, "index.html").replace("'", "'\\''")
-            )
+            path = os.path.join(outputpath, "index.html").replace("'", "'\\''")
+            print(f"   sensible-browser '{path}'")
             print()
