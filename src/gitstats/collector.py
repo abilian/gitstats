@@ -176,12 +176,12 @@ class GitDataCollector(DataCollector):
     def collect(self, dir):
         DataCollector.collect(self, dir)
 
-        tempstr = getpipeoutput(["git shortlog -s %s" % getlogrange()])
+        tempstr = getpipeoutput([f"git shortlog -s {getlogrange()}"])
         # print("Precedes")
         # print(tempstr)
         # print("Postcedes")
         self.total_authors += int(
-            getpipeoutput(["git shortlog -s %s" % getlogrange(), "wc -l"])
+            getpipeoutput([f"git shortlog -s {getlogrange()}", "wc -l"])
         )
         # self.total_lines = int(getoutput('git-ls-files -z |xargs -0 cat |wc -l'))
 
@@ -212,7 +212,7 @@ class GitDataCollector(DataCollector):
                 }
         keys = self.tags.keys()
         for tag in keys:
-            cmd = 'git shortlog -s "%s"' % tag
+            cmd = f'git shortlog -s "{tag}"'
             output = getpipeoutput([cmd])
             if len(output) == 0:
                 continue
@@ -347,7 +347,7 @@ class GitDataCollector(DataCollector):
             yymmdd = date.strftime("%Y-%m-%d")
             if "last_active_day" not in self.authors[author]:
                 self.authors[author]["last_active_day"] = yymmdd
-                self.authors[author]["active_days"] = set([yymmdd])
+                self.authors[author]["active_days"] = {yymmdd}
             elif yymmdd != self.authors[author]["last_active_day"]:
                 self.authors[author]["last_active_day"] = yymmdd
                 self.authors[author]["active_days"].add(yymmdd)
@@ -412,17 +412,17 @@ class GitDataCollector(DataCollector):
             try:
                 self.files_by_stamp[int(stamp)] = int(files)
             except ValueError:
-                print('Warning: failed to parse line "%s"' % line)
+                print(f'Warning: failed to parse line "{line}"')
 
         # extensions and size of files
         lines = getpipeoutput(
-            ["git ls-tree -r -l -z %s" % getcommitrange("HEAD", end_only=True)]
+            [f"git ls-tree -r -l -z {getcommitrange('HEAD', end_only=True)}"]
         ).split("\000")
         blobs_to_read = []
         for line in lines:
             if len(line) == 0:
                 continue
-            parts = re.split("\s+", line, 4)
+            parts = re.split(r"\s+", line, 4)
             if parts[0] == "160000" and parts[3] == "-":
                 # skip submodules
                 continue
@@ -456,11 +456,7 @@ class GitDataCollector(DataCollector):
                 else:
                     blobs_to_read.append((ext, blob_id))
             else:
-                print(
-                    "Skipping file with ignored extension '{}': {}".format(
-                        ext, filename
-                    )
-                )
+                print(f"Skipping file with ignored extension '{ext}': {filename}")
 
         # Get info abount line count for new blob's that wasn't found in cache
         pool = Pool(processes=conf["processes"])
@@ -533,9 +529,9 @@ class GitDataCollector(DataCollector):
 
                         files, inserted, deleted = 0, 0, 0
                     except ValueError:
-                        print('Warning: unexpected line "%s"' % line)
+                        print(f'Warning: unexpected line "{line}"')
                 else:
-                    print('Warning: unexpected line "%s"' % line)
+                    print(f'Warning: unexpected line "{line}"')
             else:
                 numbers = getstatsummarycounts(line)
 
@@ -547,7 +543,7 @@ class GitDataCollector(DataCollector):
                     self.total_lines_removed += deleted
 
                 else:
-                    print('Warning: failed to handle line "%s"' % line)
+                    print(f'Warning: failed to handle line "{line}"')
                     (files, inserted, deleted) = (0, 0, 0)
                 # self.changes_by_date[stamp] = { 'files': files, 'ins': inserted, 'del': deleted }
         self.total_lines += total_lines
@@ -613,16 +609,16 @@ class GitDataCollector(DataCollector):
                         ] = self.authors[author]["commits"]
                         files, inserted, deleted = 0, 0, 0
                     except ValueError:
-                        print('Warning: unexpected line "%s"' % line)
+                        print(f'Warning: unexpected line "{line}"')
                 else:
-                    print('Warning: unexpected line "%s"' % line)
+                    print(f'Warning: unexpected line "{line}"')
             else:
                 numbers = getstatsummarycounts(line)
 
                 if len(numbers) == 3:
                     (files, inserted, deleted) = map(lambda el: int(el), numbers)
                 else:
-                    print('Warning: failed to handle line "%s"' % line)
+                    print(f'Warning: failed to handle line "{line}"')
                     (files, inserted, deleted) = (0, 0, 0)
 
     def refine(self):

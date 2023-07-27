@@ -1,12 +1,14 @@
 git-stats
 =========
 
-A fork of the classic utility gitstats.
+A fork of the classic utility gitstats, with a modernized code base.
+
+Used by [Abilian](https://www.abilian.com/) to help with our code audits.
 
 ## Installation
 
 ```shell
-pip install git-stats
+pip install gitstats-abilian
 ```
 
 or 

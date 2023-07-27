@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "git-stats"
-version = "0.1.0"
+name = "gitstats-abilian"
+version = "1.0.1"
 description = ""
-authors = ["Stefane Fermigier <sf@fermigier.com>"]
+authors = ["Stefane Fermigier <sf@abilian.com>"]
 readme = "README.md"
 packages = [{include = "gitstats", from = "src" }]
 

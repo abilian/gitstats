@@ -59,12 +59,12 @@ class HTMLReportCreator(ReportCreator):
         format = "%Y-%m-%d %H:%M:%S"
         self.printHeader(f)
 
-        f.write("<h1>GitStats - %s</h1>" % data.projectname)
+        f.write(f"<h1>GitStats - {data.projectname}</h1>")
 
         self.printNav(f)
 
         f.write("<dl>")
-        f.write("<dt>Project name</dt><dd>%s</dd>" % data.projectname)
+        f.write(f"<dt>Project name</dt><dd>{data.projectname}</dd>")
         f.write(
             "<dt>Generated</dt><dd>%s (in %d seconds)</dd>"
             % (
@@ -91,7 +91,7 @@ class HTMLReportCreator(ReportCreator):
                 (100.0 * len(data.getActiveDays()) / data.getCommitDeltaDays()),
             )
         )
-        f.write("<dt>Total Files</dt><dd>%s</dd>" % data.getTotalFiles())
+        f.write(f"<dt>Total Files</dt><dd>{data.getTotalFiles()}</dd>")
         f.write(
             "<dt>Total Lines of Code</dt><dd>%s (%d added, %d removed)</dd>"
             % (data.getTotalLOC(), data.total_lines_added, data.total_lines_removed)
@@ -163,7 +163,7 @@ class HTMLReportCreator(ReportCreator):
         # bottom row: year/week
         f.write("</tr><tr>")
         for i in range(0, WEEKS):
-            f.write("<td>%s</td>" % (WEEKS - i))
+            f.write(f"<td>{WEEKS - i}</td>")
         f.write("</tr></table>")
 
         # Hour of Day
@@ -223,7 +223,7 @@ class HTMLReportCreator(ReportCreator):
                 commits = day_of_week[d]
             fp.write("%d %s %d\n" % (d + 1, WEEKDAYS[d], commits))
             f.write("<tr>")
-            f.write("<th>%s</th>" % (WEEKDAYS[d]))
+            f.write(f"<th>{WEEKDAYS[d]}</th>")
             if d in day_of_week:
                 f.write(
                     "<td>%d (%.2f%%)</td>"
@@ -246,7 +246,7 @@ class HTMLReportCreator(ReportCreator):
         f.write("</tr>")
 
         for weekday in range(0, 7):
-            f.write("<tr><th>%s</th>" % (WEEKDAYS[weekday]))
+            f.write(f"<tr><th>{WEEKDAYS[weekday]}</th>")
             for hour in range(0, 24):
                 try:
                     commits = data.activity_by_hour_of_week[weekday][hour]
@@ -302,7 +302,7 @@ class HTMLReportCreator(ReportCreator):
         f.write('<img src="commits_by_year_month.png" alt="Commits by year/month">')
         fg = open(path + "/commits_by_year_month.dat", "w")
         for yymm in sorted(data.commits_by_month.keys()):
-            fg.write("%s %s\n" % (yymm, data.commits_by_month[yymm]))
+            fg.write(f"{yymm} {data.commits_by_month[yymm]}\n")
         fg.close()
 
         # Commits by year
@@ -559,7 +559,7 @@ class HTMLReportCreator(ReportCreator):
 
         fg = open(path + "/files_by_date.dat", "w")
         for line in sorted(list(files_by_date)):
-            fg.write("%s\n" % line)
+            fg.write(f"{line}\n")
         # for stamp in sorted(data.files_by_stamp.keys()):
         # 	fg.write('%s %d\n' % (datetime.datetime.fromtimestamp(stamp).strftime('%Y-%m-%d'), data.files_by_stamp[stamp]))
         fg.close()
@@ -626,7 +626,7 @@ class HTMLReportCreator(ReportCreator):
         self.printNav(f)
 
         f.write("<dl>")
-        f.write("<dt>Total tags</dt><dd>%d</dd>" % len(data.tags))
+        f.write(f"<dt>Total tags</dt><dd>{len(data.tags)}</dd>")
         if len(data.tags) > 0:
             f.write(
                 "<dt>Average commits per tag</dt><dd>%.2f</dd>"
@@ -879,24 +879,23 @@ plot """
         os.chdir(path)
         files = glob.glob(path + "/*.plot")
         for f in files:
-            out = getpipeoutput([gnuplot_cmd + ' "%s"' % f])
+            out = getpipeoutput([gnuplot_cmd + f' "{f}"'])
             if len(out) > 0:
                 print(out)
 
     def printHeader(self, f, title=""):
         f.write(
-            """<!DOCTYPE html>
+            f"""<!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<title>GitStats - %s</title>
-	<link rel="stylesheet" href="%s" type="text/css">
-	<meta name="generator" content="GitStats %s">
-	<script type="text/javascript" src="sortable.js"></script>
+\t<meta charset="UTF-8">
+\t<title>GitStats - {self.title}</title>
+\t<link rel="stylesheet" href="{conf['style']}" type="text/css">
+\t<meta name="generator" content="GitStats {getversion()}">
+\t<script type="text/javascript" src="sortable.js"></script>
 </head>
 <body>
 """
-            % (self.title, conf["style"], getversion())
         )
 
     def printNav(self, f):

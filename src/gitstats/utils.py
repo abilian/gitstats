@@ -44,7 +44,7 @@ def getpipeoutput(cmds, quiet=(not conf["verbose"]), stream=sys.stdout):
             print(
                 "\r",
             )
-        print("[%.5f] >> %s" % (end - start, " | ".join(cmds)))
+        print(f"[{end - start:.5f}] >> {' | '.join(cmds)}")
     exectime_external += end - start
     old_output = output
     new_output = old_output.decode("utf-8")
@@ -54,7 +54,7 @@ def getpipeoutput(cmds, quiet=(not conf["verbose"]), stream=sys.stdout):
 def getlogrange(defaultrange="HEAD", end_only=True):
     commit_range = getcommitrange(defaultrange, end_only)
     if len(conf["start_date"]) > 0:
-        return '--since="%s" "%s"' % (conf["start_date"], commit_range)
+        return f"--since=\"{conf['start_date']}\" \"{commit_range}\""
     return commit_range
 
 
@@ -62,7 +62,7 @@ def getcommitrange(defaultrange="HEAD", end_only=False):
     if len(conf["commit_end"]) > 0:
         if end_only or len(conf["commit_begin"]) == 0:
             return conf["commit_end"]
-        return "%s..%s" % (conf["commit_begin"], conf["commit_end"])
+        return f"{conf['commit_begin']}..{conf['commit_end']}"
     return defaultrange
 
 
@@ -76,7 +76,7 @@ def getkeyssortedbyvaluekey(d, key):
 
 
 def getstatsummarycounts(line):
-    numbers = re.findall("\d+", line)
+    numbers = re.findall(r"\d+", line)
     if len(numbers) == 1:
         # neither insertions nor deletions: may probably only happen for "0 files changed"
         numbers.append(0)
@@ -97,9 +97,9 @@ def getnumoffilesfromrev(time_rev):
         int(time),
         rev,
         int(
-            getpipeoutput(['git ls-tree -r --name-only "%s"' % rev, "wc -l"]).split(
-                "\n"
-            )[0]
+            getpipeoutput([f'git ls-tree -r --name-only "{rev}"', "wc -l"]).split("\n")[
+                0
+            ]
         ),
     )
 
@@ -112,5 +112,5 @@ def getnumoflinesinblob(ext_blob):
     return (
         ext,
         blob_id,
-        int(getpipeoutput(["git cat-file blob %s" % blob_id, "wc -l"]).split()[0]),
+        int(getpipeoutput([f"git cat-file blob {blob_id}", "wc -l"]).split()[0]),
     )

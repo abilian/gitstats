@@ -24,4 +24,4 @@ def getgitversion():
 
 
 def getgnuplotversion():
-    return getpipeoutput(["%s --version" % gnuplot_cmd]).split("\n")[0]
+    return getpipeoutput([f"{gnuplot_cmd} --version"]).split("\n")[0]

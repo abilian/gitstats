@@ -40,7 +40,7 @@ class GitStats:
             if o == "-c":
                 key, value = v.split("=", 1)
                 if key not in conf:
-                    raise KeyError('no such key "%s" in config' % key)
+                    raise KeyError(f'no such key "{key}" in config')
                 if isinstance(conf[key], int):
                     conf[key] = int(value)
                 else:
@@ -68,14 +68,14 @@ class GitStats:
             print("gnuplot not found")
             sys.exit(1)
 
-        print("Output path: %s" % outputpath)
+        print(f"Output path: {outputpath}")
         cachefile = os.path.join(outputpath, "gitstats.cache")
 
         data = GitDataCollector()
         data.loadCache(cachefile)
 
         for gitpath in args[0:-1]:
-            print("Git path: %s" % gitpath)
+            print(f"Git path: {gitpath}")
 
             prevdir = os.getcwd()
             os.chdir(gitpath)
