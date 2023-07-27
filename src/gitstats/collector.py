@@ -7,15 +7,9 @@ import zlib
 from multiprocessing import Pool
 
 from .config import conf
-from .utils import (
-    getkeyssortedbyvaluekey,
-    getpipeoutput,
-    getlogrange,
-    getnumoffilesfromrev,
-    getcommitrange,
-    getnumoflinesinblob,
-    getstatsummarycounts,
-)
+from .utils import (getcommitrange, getkeyssortedbyvaluekey, getlogrange,
+                    getnumoffilesfromrev, getnumoflinesinblob, getpipeoutput,
+                    getstatsummarycounts)
 
 
 class DataCollector:
@@ -46,9 +40,7 @@ class DataCollector:
         #   lines_added,
         #   lines_removed.
         # }
-        self.authors = (
-            {}
-        )
+        self.authors = {}
 
         self.total_commits = 0
         self.total_files = 0

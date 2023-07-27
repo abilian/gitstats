@@ -5,9 +5,10 @@ import shutil
 import time
 from pathlib import Path
 
-from .config import conf, WEEKDAYS, GNUPLOT_COMMON, gnuplot_cmd
-from .utils import getkeyssortedbyvaluekey, getkeyssortedbyvalues, getpipeoutput
-from .version import getversion, getgitversion, getgnuplotversion
+from .config import GNUPLOT_COMMON, WEEKDAYS, conf, gnuplot_cmd
+from .utils import (getkeyssortedbyvaluekey, getkeyssortedbyvalues,
+                    getpipeoutput)
+from .version import getgitversion, getgnuplotversion, getversion
 
 
 class ReportCreator:
@@ -428,7 +429,7 @@ class HTMLReportCreator(ReportCreator):
             fgl.write("%d" % stamp)
             fgc.write("%d" % stamp)
             for author in self.authors_to_plot:
-                if author in data.changes_by_date_by_author[stamp].keys():
+                if author in data.changes_by_date_by_author[stamp]:
                     lines_by_authors[author] = data.changes_by_date_by_author[stamp][
                         author
                     ]["lines_added"]

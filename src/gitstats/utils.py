@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 
-from .config import conf, ON_LINUX, exectime_external
+from .config import ON_LINUX, conf, exectime_external
 
 
 def getpipeoutput(cmds, quiet=(not conf["verbose"]), stream=sys.stdout):

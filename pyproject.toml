@@ -18,3 +18,55 @@ abilian-devtools = "^0.5.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# -----------------------------------------------------------------------------
+
+[tool.ruff]
+select = [
+    "A", # flake8-builtins
+    "B", # flake8-bugbear
+    "BLE", # flake8-blind-except
+    "C4", # flake8-comprehensions
+    "C90", # mccabe
+    #    "D", # pydocstyle
+    #    "DJ", # flake8-django
+    "DTZ", # flake8-datetimez
+    "E", # pycodestyle errors
+    "ERA", # eradicate
+    "EXE", # flake8-executable
+    "F", # pyflakes
+    "G", # flake8-logging-format
+    "I", # isort
+    "ICN", # flake8-import-conventions
+    "ISC", # flake8-implicit-str-concat
+    "N", # pep8-naming
+    "PIE", # flake8-pie
+    "PLC", # pylint - convention
+    "PLE", # pylint - error
+    "PLW", # pylint - warning
+    "PTH", # flake8-use-pathlib
+    "Q", # flake8-quotes
+    "RET", # flake8-return
+    "RUF", # Ruff-specific rules
+    "S", # flake8-bandit
+    "SIM", # flake8-simplify
+    "T10", # flake8-debugger
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "UP", # pyupgrade
+    "W", # pycodestyle - warning
+    "YTT", # flake8-2020
+]
+
+ignore = [
+    "E501", # line too long
+    "A001", # Shadowing built-in
+    "A002", # Shadowing built-in
+    "A003", # Shadowing built-in
+    "T201", # Print statement found
+    "N802", # function name should be lowercase
+    "PTH123", # Use `pathlib` instead of `os.path`
+    "SIM115", # Use context manager
+    "ERA001", # Commented out code`
+]
