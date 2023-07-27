@@ -1,3 +1,15 @@
+clean:
+	rm -rf stats dist
+
+run:
+	gitstats . stats
+
+release:
+	rm -rf dist
+	poetry build
+	twine upload dist/*
+	
+
 #PREFIX=/usr/local
 #BINDIR=$(PREFIX)/bin
 #RESOURCEDIR=$(PREFIX)/share/gitstats

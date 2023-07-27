@@ -1,6 +1,5 @@
 import os
 import platform
-import time
 
 GNUPLOT_COMMON = "set terminal png transparent size 640,240\nset size 1.0,1.0\n"
 ON_LINUX = platform.system() == "Linux"

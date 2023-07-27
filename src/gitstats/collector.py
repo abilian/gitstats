@@ -176,7 +176,7 @@ class GitDataCollector(DataCollector):
     def collect(self, dir):
         DataCollector.collect(self, dir)
 
-        tempstr = getpipeoutput([f"git shortlog -s {getlogrange()}"])
+        # getpipeoutput([f"git shortlog -s {getlogrange()}"])
         # print("Precedes")
         # print(tempstr)
         # print("Postcedes")
@@ -498,7 +498,7 @@ class GitDataCollector(DataCollector):
                 continue
 
             # <stamp> <author>
-            if re.search("files? changed", line) == None:
+            if re.search("files? changed", line) is None:
                 pos = line.find(" ")
                 if pos != -1:
                     try:
@@ -573,7 +573,7 @@ class GitDataCollector(DataCollector):
                 continue
 
             # <stamp> <author>
-            if re.search("files? changed", line) == None:
+            if re.search("files? changed", line) is None:
                 pos = line.find(" ")
                 if pos != -1:
                     try:
