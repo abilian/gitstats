@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gitstats-abilian"
-version = "1.0.1"
+version = "1.0.2"
 description = ""
 authors = ["Stefane Fermigier <sf@abilian.com>"]
 readme = "README.md"

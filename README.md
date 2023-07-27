@@ -14,7 +14,7 @@ pip install gitstats-abilian
 or 
 
 ```shell
-pip install git-stats
+pip install gitstats-abilian
 ```
 
 ## usage
