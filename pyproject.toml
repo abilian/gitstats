@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gitstats"
+name = "git-stats"
 version = "0.1.0"
 description = ""
 authors = ["Stefane Fermigier <sf@fermigier.com>"]
@@ -10,8 +10,7 @@ packages = [{include = "gitstats", from = "src" }]
 gitstats = "gitstats.main:main"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-
+python = "^3.9"
 
 [build-system]
 requires = ["poetry-core"]
