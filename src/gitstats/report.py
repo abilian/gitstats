@@ -42,10 +42,19 @@ class HTMLReportCreator(ReportCreator):
     title: str
 
     def create(self, data, path):
-        ReportCreator.create(self, data, path)
+        super().create(data, path)
         self.title = data.projectname
 
-        # copy static files. Looks in the binary directory, ../share/gitstats and /usr/share/gitstats
+        self.copy_assets(path)
+        self.create_main_report(data, path)
+        totalcommits = self.create_activity_report(data, path)
+        self.create_authors_report(data, path, totalcommits)
+        self.create_files_report(data, path)
+        self.create_lines_report(data, path)
+        self.create_tags_report(data, path)
+        self.createGraphs(path)
+
+    def copy_assets(self, path):
         for file in (
             conf["style"],
             "sortable.js",
@@ -57,14 +66,12 @@ class HTMLReportCreator(ReportCreator):
             dst_path = Path(path) / file
             shutil.copyfile(src_path, dst_path)
 
+    def create_main_report(self, data, path):
         f = open(path + "/index.html", "w")
         format = "%Y-%m-%d %H:%M:%S"
         self.printHeader(f)
-
         f.write(f"<h1>GitStats - {data.projectname}</h1>")
-
         self.printNav(f)
-
         f.write("<dl>")
         f.write(f"<dt>Project name</dt><dd>{data.projectname}</dd>")
         f.write(
@@ -112,26 +119,20 @@ class HTMLReportCreator(ReportCreator):
             )
         )
         f.write("</dl>")
-
         f.write("</body>\n</html>")
         f.close()
 
-        ###
-        # Activity
+    def create_activity_report(self, data, path):
         f = open(path + "/activity.html", "w")
         self.printHeader(f)
         f.write("<h1>Activity</h1>")
         self.printNav(f)
-
         # f.write('<h2>Last 30 days</h2>')
-
         # f.write('<h2>Last 12 months</h2>')
-
         # Weekly activity
         WEEKS = 32
         f.write(html_header(2, "Weekly activity"))
         f.write("<p>Last %d weeks</p>" % WEEKS)
-
         # generate weeks to show (previous N weeks from now)
         now = datetime.datetime.now()
         deltaweek = datetime.timedelta(7)
@@ -140,7 +141,6 @@ class HTMLReportCreator(ReportCreator):
         for i in range(0, WEEKS):
             weeks.insert(0, stampcur.strftime("%Y-%W"))
             stampcur -= deltaweek
-
         # top row: commits & bar
         f.write('<table class="noborders"><tr>')
         for i in range(0, WEEKS):
@@ -159,13 +159,11 @@ class HTMLReportCreator(ReportCreator):
                 '<td style="text-align: center; vertical-align: bottom">%d<div style="display: block; background-color: red; width: 20px; height: %dpx"></div></td>'
                 % (commits, height)
             )
-
         # bottom row: year/week
         f.write("</tr><tr>")
         for i in range(0, WEEKS):
             f.write(f"<td>{WEEKS - i}</td>")
         f.write("</tr></table>")
-
         # Hour of Day
         f.write(html_header(2, "Hour of Day"))
         hour_of_day = data.getActivityByHourOfDay()
@@ -210,7 +208,6 @@ class HTMLReportCreator(ReportCreator):
             else:
                 fg.write("%d 0\n" % (i + 1))
         fg.close()
-
         # Day of Week
         f.write(html_header(2, "Day of Week"))
         day_of_week = data.getActivityByDayOfWeek()
@@ -235,16 +232,13 @@ class HTMLReportCreator(ReportCreator):
         f.write("</table></div>")
         f.write('<img src="day_of_week.png" alt="Day of Week">')
         fp.close()
-
         # Hour of Week
         f.write(html_header(2, "Hour of Week"))
         f.write("<table>")
-
         f.write("<tr><th>Weekday</th>")
         for hour in range(0, 24):
             f.write("<th>%d</th>" % (hour))
         f.write("</tr>")
-
         for weekday in range(0, 7):
             f.write(f"<tr><th>{WEEKDAYS[weekday]}</th>")
             for hour in range(0, 24):
@@ -262,9 +256,7 @@ class HTMLReportCreator(ReportCreator):
                 else:
                     f.write("<td></td>")
             f.write("</tr>")
-
         f.write("</table>")
-
         # Month of Year
         f.write(html_header(2, "Month of Year"))
         f.write('<div class="vtable"><table>')
@@ -282,7 +274,6 @@ class HTMLReportCreator(ReportCreator):
         fp.close()
         f.write("</table></div>")
         f.write('<img src="month_of_year.png" alt="Month of Year">')
-
         # Commits by year/month
         f.write(html_header(2, "Commits by year/month"))
         f.write(
@@ -304,7 +295,6 @@ class HTMLReportCreator(ReportCreator):
         for yymm in sorted(data.commits_by_month.keys()):
             fg.write(f"{yymm} {data.commits_by_month[yymm]}\n")
         fg.close()
-
         # Commits by year
         f.write(html_header(2, "Commits by Year"))
         f.write(
@@ -327,7 +317,6 @@ class HTMLReportCreator(ReportCreator):
         for yy in sorted(data.commits_by_year.keys()):
             fg.write("%d %d\n" % (yy, data.commits_by_year[yy]))
         fg.close()
-
         # Commits by timezone
         f.write(html_header(2, "Commits by Timezone"))
         f.write("<table><tr>")
@@ -342,21 +331,17 @@ class HTMLReportCreator(ReportCreator):
                 % (i, r, commits)
             )
         f.write("</table>")
-
         f.write("</body></html>")
         f.close()
+        return totalcommits
 
-        ###
-        # Authors
+    def create_authors_report(self, data, path, totalcommits):
         f = open(path + "/authors.html", "w")
         self.printHeader(f)
-
         f.write("<h1>Authors</h1>")
         self.printNav(f)
-
         # Authors :: List of authors
         f.write(html_header(2, "List of Authors"))
-
         f.write('<table class="authors sortable" id="authors">')
         f.write(
             '<tr><th>Author</th><th>Commits (%)</th><th>+ lines</th><th>- lines</th><th>First commit</th><th>Last commit</th><th class="unsortable">Age</th><th>Active days</th><th># by commits</th></tr>'
@@ -379,7 +364,6 @@ class HTMLReportCreator(ReportCreator):
                 )
             )
         f.write("</table>")
-
         allauthors = data.getAuthors()
         if len(allauthors) > conf["max_authors"]:
             rest = allauthors[conf["max_authors"] :]
@@ -387,7 +371,6 @@ class HTMLReportCreator(ReportCreator):
                 '<p class="moreauthors">These didn\'t make it to the top: %s</p>'
                 % ", ".join(rest)
             )
-
         f.write(html_header(2, "Cumulated Added Lines of Code per Author"))
         f.write(
             '<img src="lines_of_code_by_author.png" alt="Lines of code per Author">'
@@ -397,7 +380,6 @@ class HTMLReportCreator(ReportCreator):
                 '<p class="moreauthors">Only top %d authors shown</p>'
                 % conf["max_authors"]
             )
-
         f.write(html_header(2, "Commits per Author"))
         f.write('<img src="commits_by_author.png" alt="Commits per Author">')
         if len(allauthors) > conf["max_authors"]:
@@ -405,21 +387,17 @@ class HTMLReportCreator(ReportCreator):
                 '<p class="moreauthors">Only top %d authors shown</p>'
                 % conf["max_authors"]
             )
-
         fgl = open(path + "/lines_of_code_by_author.dat", "w")
         fgc = open(path + "/commits_by_author.dat", "w")
-
         lines_by_authors = {}  # cumulated added lines by
         # author. to save memory,
         # changes_by_date_by_author[stamp][author] is defined
         # only at points where author commits.
         # lines_by_authors allows us to generate all the
         # points in the .dat file.
-
         # Don't rely on getAuthors to give the same order each
         # time. Be robust and keep the list in a variable.
         commits_by_authors = {}  # cumulated added lines by
-
         self.authors_to_plot = data.getAuthors(conf["max_authors"])
         for author in self.authors_to_plot:
             lines_by_authors[author] = 0
@@ -441,7 +419,6 @@ class HTMLReportCreator(ReportCreator):
             fgc.write("\n")
         fgl.close()
         fgc.close()
-
         # Authors :: Author of Month
         f.write(html_header(2, "Author of Month"))
         f.write('<table class="sortable" id="aom">')
@@ -468,9 +445,7 @@ class HTMLReportCreator(ReportCreator):
                     len(authors),
                 )
             )
-
         f.write("</table>")
-
         f.write(html_header(2, "Author of Year"))
         f.write(
             '<table class="sortable" id="aoy"><tr><th>Year</th><th>Author</th><th>Commits (%%)</th><th class="unsortable">Next top %d</th><th>Number of authors</th></tr>'
@@ -496,7 +471,6 @@ class HTMLReportCreator(ReportCreator):
                 )
             )
         f.write("</table>")
-
         # Domains
         f.write(html_header(2, "Commits by Domains"))
         domains_by_commits = getkeyssortedbyvaluekey(data.domains, "commits")
@@ -520,17 +494,14 @@ class HTMLReportCreator(ReportCreator):
         f.write("</table></div>")
         f.write('<img src="domains.png" alt="Commits by Domains">')
         fp.close()
-
         f.write("</body></html>")
         f.close()
 
-        ###
-        # Files
+    def create_files_report(self, data, path):
         f = open(path + "/files.html", "w")
         self.printHeader(f)
         f.write("<h1>Files</h1>")
         self.printNav(f)
-
         f.write("<dl>\n")
         f.write("<dt>Total files</dt><dd>%d</dd>" % data.getTotalFiles())
         f.write("<dt>Total lines</dt><dd>%d</dd>" % data.getTotalLOC())
@@ -539,12 +510,9 @@ class HTMLReportCreator(ReportCreator):
                 "<dt>Average file size</dt><dd>%.2f bytes</dd>"
                 % (float(data.getTotalSize()) / data.getTotalFiles())
             )
-
         f.write("</dl>\n")
-
         # Files :: File count by date
         f.write(html_header(2, "File count by date"))
-
         # use set to get rid of duplicate/unnecessary entries
         files_by_date = set()
         for stamp in sorted(data.files_by_stamp.keys()):
@@ -555,18 +523,14 @@ class HTMLReportCreator(ReportCreator):
                     data.files_by_stamp[stamp],
                 )
             )
-
         fg = open(path + "/files_by_date.dat", "w")
         for line in sorted(files_by_date):
             fg.write(f"{line}\n")
         # for stamp in sorted(data.files_by_stamp.keys()):
         # 	fg.write('%s %d\n' % (datetime.datetime.fromtimestamp(stamp).strftime('%Y-%m-%d'), data.files_by_stamp[stamp]))
         fg.close()
-
         f.write('<img src="files_by_date.png" alt="Files by Date">')
-
         # f.write('<h2>Average file size by date</h2>')
-
         # Files :: Extensions
         f.write(html_header(2, "Extensions"))
         f.write(
@@ -591,39 +555,31 @@ class HTMLReportCreator(ReportCreator):
                 )
             )
         f.write("</table>")
-
         f.write("</body></html>")
         f.close()
 
-        ###
-        # Lines
+    def create_lines_report(self, data, path):
         f = open(path + "/lines.html", "w")
         self.printHeader(f)
         f.write("<h1>Lines</h1>")
         self.printNav(f)
-
         f.write("<dl>\n")
         f.write("<dt>Total lines</dt><dd>%d</dd>" % data.getTotalLOC())
         f.write("</dl>\n")
-
         f.write(html_header(2, "Lines of Code"))
         f.write('<img src="lines_of_code.png" alt="Lines of Code">')
-
         fg = open(path + "/lines_of_code.dat", "w")
         for stamp in sorted(data.changes_by_date.keys()):
             fg.write("%d %d\n" % (stamp, data.changes_by_date[stamp]["lines"]))
         fg.close()
-
         f.write("</body></html>")
         f.close()
 
-        ###
-        # tags.html
+    def create_tags_report(self, data, path):
         f = open(path + "/tags.html", "w")
         self.printHeader(f)
         f.write("<h1>Tags</h1>")
         self.printNav(f)
-
         f.write("<dl>")
         f.write(f"<dt>Total tags</dt><dd>{len(data.tags)}</dd>")
         if len(data.tags) > 0:
@@ -632,7 +588,6 @@ class HTMLReportCreator(ReportCreator):
                 % (1.0 * data.getTotalCommits() / len(data.tags))
             )
         f.write("</dl>")
-
         f.write('<table class="tags">')
         f.write("<tr><th>Name</th><th>Date</th><th>Commits</th><th>Authors</th></tr>")
         # sort the tags by date desc
@@ -659,11 +614,8 @@ class HTMLReportCreator(ReportCreator):
                 )
             )
         f.write("</table>")
-
         f.write("</body></html>")
         f.close()
-
-        self.createGraphs(path)
 
     def createGraphs(self, path):
         print("Generating graphs...")
