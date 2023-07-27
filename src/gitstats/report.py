@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import glob
 import os
@@ -74,12 +75,12 @@ class HTMLReportCreator(ReportCreator):
             )
         )
         f.write(
-            '<dt>Generator</dt><dd><a href="http://gitstats.sourceforge.net/">GitStats</a> (version %s), %s, %s</dd>'
-            % (getversion(), getgitversion(), getgnuplotversion())
+            '<dt>Generator</dt><dd><a href="http://gitstats.sourceforge.net/">GitStats</a> (version {}), {}, {}</dd>'.format(
+                getversion(), getgitversion(), getgnuplotversion()
+            )
         )
         f.write(
-            "<dt>Report Period</dt><dd>%s to %s</dd>"
-            % (
+            "<dt>Report Period</dt><dd>{} to {}</dd>".format(
                 data.getFirstCommitDate().strftime(format),
                 data.getLastCommitDate().strftime(format),
             )
@@ -98,16 +99,14 @@ class HTMLReportCreator(ReportCreator):
             % (data.getTotalLOC(), data.total_lines_added, data.total_lines_removed)
         )
         f.write(
-            "<dt>Total Commits</dt><dd>%s (average %.1f commits per active day, %.1f per all days)</dd>"
-            % (
+            "<dt>Total Commits</dt><dd>{} (average {:.1f} commits per active day, {:.1f} per all days)</dd>".format(
                 data.getTotalCommits(),
                 float(data.getTotalCommits()) / len(data.getActiveDays()),
                 float(data.getTotalCommits()) / data.getCommitDeltaDays(),
             )
         )
         f.write(
-            "<dt>Authors</dt><dd>%s (average %.1f commits per author)</dd>"
-            % (
+            "<dt>Authors</dt><dd>{} (average {:.1f} commits per author)</dd>".format(
                 data.getTotalAuthors(),
                 (1.0 * data.getTotalCommits()) / data.getTotalAuthors(),
             )
@@ -289,7 +288,7 @@ class HTMLReportCreator(ReportCreator):
         f.write(
             '<div class="vtable"><table><tr><th>Month</th><th>Commits</th><th>Lines added</th><th>Lines removed</th></tr>'
         )
-        for yymm in reversed(sorted(data.commits_by_month.keys())):
+        for yymm in sorted(data.commits_by_month.keys(), reverse=True):
             f.write(
                 "<tr><td>%s</td><td>%d</td><td>%d</td><td>%d</td></tr>"
                 % (
@@ -311,7 +310,7 @@ class HTMLReportCreator(ReportCreator):
         f.write(
             '<div class="vtable"><table><tr><th>Year</th><th>Commits (% of all)</th><th>Lines added</th><th>Lines removed</th></tr>'
         )
-        for yy in reversed(sorted(data.commits_by_year.keys())):
+        for yy in sorted(data.commits_by_year.keys(), reverse=True):
             f.write(
                 "<tr><td>%s</td><td>%d (%.2f%%)</td><td>%d</td><td>%d</td></tr>"
                 % (
@@ -450,7 +449,7 @@ class HTMLReportCreator(ReportCreator):
             '<tr><th>Month</th><th>Author</th><th>Commits (%%)</th><th class="unsortable">Next top %d</th><th>Number of authors</th></tr>'
             % conf["authors_top"]
         )
-        for yymm in reversed(sorted(data.author_of_month.keys())):
+        for yymm in sorted(data.author_of_month.keys(), reverse=True):
             authordict = data.author_of_month[yymm]
             authors = getkeyssortedbyvalues(authordict)
             authors = list(authors)
@@ -477,7 +476,7 @@ class HTMLReportCreator(ReportCreator):
             '<table class="sortable" id="aoy"><tr><th>Year</th><th>Author</th><th>Commits (%%)</th><th class="unsortable">Next top %d</th><th>Number of authors</th></tr>'
             % conf["authors_top"]
         )
-        for yy in reversed(sorted(data.author_of_year.keys())):
+        for yy in sorted(data.author_of_year.keys(), reverse=True):
             authordict = data.author_of_year[yy]
             authors = getkeyssortedbyvalues(authordict)
             authors = list(authors)
@@ -535,13 +534,12 @@ class HTMLReportCreator(ReportCreator):
         f.write("<dl>\n")
         f.write("<dt>Total files</dt><dd>%d</dd>" % data.getTotalFiles())
         f.write("<dt>Total lines</dt><dd>%d</dd>" % data.getTotalLOC())
-        try:
+        with contextlib.suppress(ZeroDivisionError):
             f.write(
                 "<dt>Average file size</dt><dd>%.2f bytes</dd>"
                 % (float(data.getTotalSize()) / data.getTotalFiles())
             )
-        except ZeroDivisionError:
-            pass
+
         f.write("</dl>\n")
 
         # Files :: File count by date
@@ -559,7 +557,7 @@ class HTMLReportCreator(ReportCreator):
             )
 
         fg = open(path + "/files_by_date.dat", "w")
-        for line in sorted(list(files_by_date)):
+        for line in sorted(files_by_date):
             fg.write(f"{line}\n")
         # for stamp in sorted(data.files_by_stamp.keys()):
         # 	fg.write('%s %d\n' % (datetime.datetime.fromtimestamp(stamp).strftime('%Y-%m-%d'), data.files_by_stamp[stamp]))
@@ -638,9 +636,11 @@ class HTMLReportCreator(ReportCreator):
         f.write('<table class="tags">')
         f.write("<tr><th>Name</th><th>Date</th><th>Commits</th><th>Authors</th></tr>")
         # sort the tags by date desc
-        tags_sorted_by_date_desc = map(
-            lambda el: el[1],
-            reversed(sorted(map(lambda el: (el[1]["date"], el[0]), data.tags.items()))),
+        tags_sorted_by_date_desc = (
+            el[1]
+            for el in sorted(
+                ((el[1]["date"], el[0]) for el in data.tags.items()), reverse=True
+            )
         )
         for tag in tags_sorted_by_date_desc:
             authorinfo = []
