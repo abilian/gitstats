@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "gitstats-abilian"
 version = "1.0.6"
-description = ""
+description = "A git history statistics generator."
 authors = ["Stefane Fermigier <sf@abilian.com>"]
 readme = "README.md"
 packages = [{ include = "gitstats", from = "src" }]
