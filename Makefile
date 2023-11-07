@@ -5,7 +5,7 @@
 PKG=abiliabn_devtools
 
 
-all: lint
+all: test lint
 
 #
 # Setup

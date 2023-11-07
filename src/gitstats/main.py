@@ -3,9 +3,11 @@ import sys
 from .gitstats import GitStats
 
 
-def main():
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
     g = GitStats()
-    g.run(sys.argv[1:])
+    g.run(args)
 
 
 if __name__ == "__main__":

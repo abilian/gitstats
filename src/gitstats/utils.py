@@ -1,5 +1,7 @@
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -12,19 +14,23 @@ def getpipeoutput(cmds, quiet=(not conf["verbose"]), stream=sys.stdout):
 
     :param cmds: Command to execute
     :param quiet: Prints commands on standard output if True.
+    :param stream: file to print output to.
     :return:
     """
     global exectime_external
+
     start = time.time()
     if not quiet and ON_LINUX and os.isatty(1):
         print(">> " + " | ".join(cmds)),
         sys.stdout.flush()
 
     processes = []
-    for x in cmds:
+    for cmd in cmds:
+        cmd_args = shlex.split(cmd)
+
         stdin = sys.stdin if len(processes) == 0 else processes[-1].stdout
         p = subprocess.Popen(
-            x, stdin=stdin, stdout=subprocess.PIPE, shell=True, cwd=os.getcwd()
+            cmd_args, stdin=stdin, stdout=subprocess.PIPE, cwd=os.getcwd(),
         )
         processes.append(p)
 
@@ -41,9 +47,7 @@ def getpipeoutput(cmds, quiet=(not conf["verbose"]), stream=sys.stdout):
     end = time.time()
     if not quiet:
         if ON_LINUX and os.isatty(1):
-            print(
-                "\r",
-            )
+            print("\r")
         print(f"[{end - start:.5f}] >> {' | '.join(cmds)}")
     exectime_external += end - start
     old_output = output
