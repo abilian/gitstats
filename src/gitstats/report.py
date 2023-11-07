@@ -7,8 +7,7 @@ import time
 from pathlib import Path
 
 from .config import GNUPLOT_COMMON, WEEKDAYS, conf, gnuplot_cmd
-from .utils import (getkeyssortedbyvaluekey, getkeyssortedbyvalues,
-                    getpipeoutput)
+from .utils import getkeyssortedbyvaluekey, getkeyssortedbyvalues, getpipeoutput
 from .version import getgitversion, getgnuplotversion, getversion
 
 
@@ -69,9 +68,9 @@ class HTMLReportCreator(ReportCreator):
     def create_main_report(self, data, path):
         f = open(path + "/index.html", "w")
         format = "%Y-%m-%d %H:%M:%S"
-        self.printHeader(f)
+        self.print_header(f)
         f.write(f"<h1>GitStats - {data.projectname}</h1>")
-        self.printNav(f)
+        self.print_nav(f)
         f.write("<dl>")
         f.write(f"<dt>Project name</dt><dd>{data.projectname}</dd>")
         f.write(
@@ -124,9 +123,9 @@ class HTMLReportCreator(ReportCreator):
 
     def create_activity_report(self, data, path):
         f = open(path + "/activity.html", "w")
-        self.printHeader(f)
+        self.print_header(f)
         f.write("<h1>Activity</h1>")
-        self.printNav(f)
+        self.print_nav(f)
         # f.write('<h2>Last 30 days</h2>')
         # f.write('<h2>Last 12 months</h2>')
         # Weekly activity
@@ -138,12 +137,12 @@ class HTMLReportCreator(ReportCreator):
         deltaweek = datetime.timedelta(7)
         weeks = []
         stampcur = now
-        for i in range(0, WEEKS):
+        for i in range(WEEKS):
             weeks.insert(0, stampcur.strftime("%Y-%W"))
             stampcur -= deltaweek
         # top row: commits & bar
         f.write('<table class="noborders"><tr>')
-        for i in range(0, WEEKS):
+        for i in range(WEEKS):
             commits = 0
             if weeks[i] in data.activity_by_year_week:
                 commits = data.activity_by_year_week[weeks[i]]
@@ -161,18 +160,18 @@ class HTMLReportCreator(ReportCreator):
             )
         # bottom row: year/week
         f.write("</tr><tr>")
-        for i in range(0, WEEKS):
+        for i in range(WEEKS):
             f.write(f"<td>{WEEKS - i}</td>")
         f.write("</tr></table>")
         # Hour of Day
         f.write(html_header(2, "Hour of Day"))
         hour_of_day = data.getActivityByHourOfDay()
         f.write("<table><tr><th>Hour</th>")
-        for i in range(0, 24):
+        for i in range(24):
             f.write("<th>%d</th>" % i)
         f.write("</tr>\n<tr><th>Commits</th>")
         fp = open(path + "/hour_of_day.dat", "w")
-        for i in range(0, 24):
+        for i in range(24):
             if i in hour_of_day:
                 r = 127 + int(
                     (float(hour_of_day[i]) / data.activity_by_hour_of_day_busiest) * 128
@@ -188,7 +187,7 @@ class HTMLReportCreator(ReportCreator):
         fp.close()
         f.write("</tr>\n<tr><th>%</th>")
         totalcommits = data.getTotalCommits()
-        for i in range(0, 24):
+        for i in range(24):
             if i in hour_of_day:
                 r = 127 + int(
                     (float(hour_of_day[i]) / data.activity_by_hour_of_day_busiest) * 128
@@ -202,7 +201,7 @@ class HTMLReportCreator(ReportCreator):
         f.write("</tr></table>")
         f.write('<img src="hour_of_day.png" alt="Hour of Day">')
         fg = open(path + "/hour_of_day.dat", "w")
-        for i in range(0, 24):
+        for i in range(24):
             if i in hour_of_day:
                 fg.write("%d %d\n" % (i + 1, hour_of_day[i]))
             else:
@@ -214,7 +213,7 @@ class HTMLReportCreator(ReportCreator):
         f.write('<div class="vtable"><table>')
         f.write("<tr><th>Day</th><th>Total (%)</th></tr>")
         fp = open(path + "/day_of_week.dat", "w")
-        for d in range(0, 7):
+        for d in range(7):
             commits = 0
             if d in day_of_week:
                 commits = day_of_week[d]
@@ -236,12 +235,12 @@ class HTMLReportCreator(ReportCreator):
         f.write(html_header(2, "Hour of Week"))
         f.write("<table>")
         f.write("<tr><th>Weekday</th>")
-        for hour in range(0, 24):
+        for hour in range(24):
             f.write("<th>%d</th>" % (hour))
         f.write("</tr>")
-        for weekday in range(0, 7):
+        for weekday in range(7):
             f.write(f"<tr><th>{WEEKDAYS[weekday]}</th>")
-            for hour in range(0, 24):
+            for hour in range(24):
                 try:
                     commits = data.activity_by_hour_of_week[weekday][hour]
                 except KeyError:
@@ -337,9 +336,9 @@ class HTMLReportCreator(ReportCreator):
 
     def create_authors_report(self, data, path, totalcommits):
         f = open(path + "/authors.html", "w")
-        self.printHeader(f)
+        self.print_header(f)
         f.write("<h1>Authors</h1>")
-        self.printNav(f)
+        self.print_nav(f)
         # Authors :: List of authors
         f.write(html_header(2, "List of Authors"))
         f.write('<table class="authors sortable" id="authors">')
@@ -499,9 +498,9 @@ class HTMLReportCreator(ReportCreator):
 
     def create_files_report(self, data, path):
         f = open(path + "/files.html", "w")
-        self.printHeader(f)
+        self.print_header(f)
         f.write("<h1>Files</h1>")
-        self.printNav(f)
+        self.print_nav(f)
         f.write("<dl>\n")
         f.write("<dt>Total files</dt><dd>%d</dd>" % data.getTotalFiles())
         f.write("<dt>Total lines</dt><dd>%d</dd>" % data.getTotalLOC())
@@ -560,9 +559,9 @@ class HTMLReportCreator(ReportCreator):
 
     def create_lines_report(self, data, path):
         f = open(path + "/lines.html", "w")
-        self.printHeader(f)
+        self.print_header(f)
         f.write("<h1>Lines</h1>")
-        self.printNav(f)
+        self.print_nav(f)
         f.write("<dl>\n")
         f.write("<dt>Total lines</dt><dd>%d</dd>" % data.getTotalLOC())
         f.write("</dl>\n")
@@ -577,9 +576,9 @@ class HTMLReportCreator(ReportCreator):
 
     def create_tags_report(self, data, path):
         f = open(path + "/tags.html", "w")
-        self.printHeader(f)
+        self.print_header(f)
         f.write("<h1>Tags</h1>")
-        self.printNav(f)
+        self.print_nav(f)
         f.write("<dl>")
         f.write(f"<dt>Total tags</dt><dd>{len(data.tags)}</dd>")
         if len(data.tags) > 0:
@@ -836,7 +835,7 @@ plot """
             if len(out) > 0:
                 print(out)
 
-    def printHeader(self, f, title=""):
+    def print_header(self, f, title=""):
         f.write(
             f"""<!DOCTYPE html>
 <html>
@@ -851,7 +850,7 @@ plot """
 """
         )
 
-    def printNav(self, f):
+    def print_nav(self, f):
         f.write(
             """
 <div class="nav">

@@ -8,8 +8,8 @@ from .config import ON_LINUX, conf, exectime_external
 
 
 def getpipeoutput(cmds, quiet=(not conf["verbose"]), stream=sys.stdout):
-    """
-    Standardised method of calling linux commands.
+    """Standardised method of calling linux commands.
+
     :param cmds: Command to execute
     :param quiet: Prints commands on standard output if True.
     :return:
@@ -89,9 +89,7 @@ def getstatsummarycounts(line):
 
 
 def getnumoffilesfromrev(time_rev):
-    """
-    Get number of files changed in commit
-    """
+    """Get number of files changed in commit."""
     time, rev = time_rev
     return (
         int(time),
@@ -105,9 +103,7 @@ def getnumoffilesfromrev(time_rev):
 
 
 def getnumoflinesinblob(ext_blob):
-    """
-    Get number of lines in blob
-    """
+    """Get number of lines in blob."""
     ext, blob_id = ext_blob
     return (
         ext,

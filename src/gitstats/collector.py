@@ -7,9 +7,15 @@ import zlib
 from multiprocessing import Pool
 
 from .config import conf
-from .utils import (getcommitrange, getkeyssortedbyvaluekey, getlogrange,
-                    getnumoffilesfromrev, getnumoflinesinblob, getpipeoutput,
-                    getstatsummarycounts)
+from .utils import (
+    getcommitrange,
+    getkeyssortedbyvaluekey,
+    getlogrange,
+    getnumoffilesfromrev,
+    getnumoflinesinblob,
+    getpipeoutput,
+    getstatsummarycounts,
+)
 
 
 class DataCollector:
