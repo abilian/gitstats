@@ -1,46 +1,111 @@
+.PHONY: all develop test lint clean doc format
+.PHONY: clean clean-build clean-pyc clean-test coverage dist docs install lint lint/flake8
+
+# The package name
+PKG=abiliabn_devtools
+
+
+all: lint
+
+#
+# Setup
+#
+
+## Install development dependencies and pre-commit hook (env must be already activated)
+develop: install-deps activate-pre-commit configure-git
+
+install-deps:
+	@echo "--> Installing dependencies"
+	pip install -U pip setuptools wheel
+	poetry install
+
+activate-pre-commit:
+	@echo "--> Activating pre-commit hook"
+	pre-commit install
+
+configure-git:
+	@echo "--> Configuring git"
+	git config branch.autosetuprebase always
+
+
+#
+# testing & checking
+#
+
+## Run python tests
+test:
+	@echo "--> Running Python tests"
+	pytest -x -p no:randomly
+	@echo ""
+
+test-randomly:
+	@echo "--> Running Python tests in random order"
+	pytest
+
+## Lint / check typing
+lint:
+	adt check src tests
+
+
+#
+# Formatting
+#
+
+## Format / beautify code
+format:
+	adt format
+	docformatter -i -r src
+
+
+#
+# Everything else
+#
+help:
+	adt help-make
+
+install:
+	poetry install
+
+doc: doc-html doc-pdf
+
+doc-html:
+	sphinx-build -W -b html docs/ docs/_build/html
+
+doc-pdf:
+	sphinx-build -W -b latex docs/ docs/_build/latex
+	make -C docs/_build/latex all-pdf
+
+## Cleanup repository
 clean:
-	rm -rf stats dist
+	adt clean
+	rm -f **/*.pyc
+	find . -type d -empty -delete
+	rm -rf *.egg-info *.egg .coverage .eggs .cache .mypy_cache .pyre \
+		.pytest_cache .pytest .DS_Store  docs/_build docs/cache docs/tmp \
+		dist build pip-wheel-metadata junit-*.xml htmlcov coverage.xml
 
-run:
-	gitstats . stats
+## Cleanup harder
+tidy: clean
+	rm -rf .nox
+	rm -rf node_modules
+	rm -rf instance
 
-release:
-	rm -rf dist
+## Update dependencies
+update-deps:
+	pip install -U pip setuptools wheel
+	poetry update
+
+## Publish to PyPI
+publish: clean
+	git push
+	git push --tags
 	poetry build
 	twine upload dist/*
-	
 
-#PREFIX=/usr/local
-#BINDIR=$(PREFIX)/bin
-#RESOURCEDIR=$(PREFIX)/share/gitstats
-#RESOURCES=gitstats.css sortable.js *.gif
-#BINARIES=gitstats
-#VERSION=$(shell git describe 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || date +%Y-%m-%d)
-#SEDVERSION=perl -pi -e 's/VERSION = 0/VERSION = "$(VERSION)"/' --
-#
-#all: help
-#
-#help:
-#	@echo "Usage:"
-#	@echo
-#	@echo "make install                   # install to ${PREFIX}"
-#	@echo "make install PREFIX=~          # install to ~"
-#	@echo "make release [VERSION=foo]     # make a release tarball"
-#	@echo
-#
-#install:
-#	install -d $(BINDIR) $(RESOURCEDIR)
-#	install -v $(BINARIES) $(BINDIR)
-#	install -v -m 644 $(RESOURCES) $(RESOURCEDIR)
-#	$(SEDVERSION) $(BINDIR)/gitstats
-#
-#release:
-#	@cp gitstats gitstats.tmp
-#	@$(SEDVERSION) gitstats.tmp
-#	@tar --owner=0 --group=0 --transform 's!^!gitstats/!' --transform 's!gitstats.tmp!gitstats!' -zcf gitstats-$(VERSION).tar.gz gitstats.tmp $(RESOURCES) doc/ Makefile
-#	@$(RM) gitstats.tmp
-#
-#man:
-#	pod2man --center "User Commands" -r $(VERSION) doc/gitstats.pod > doc/gitstats.1
-#
-#.PHONY: all help install release
+## Tag release and publish
+release: clean
+	adt bump-version
+	git push
+	git push --tags
+	poetry build
+	twine upload dist/*
